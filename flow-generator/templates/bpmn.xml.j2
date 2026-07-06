@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" 
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+                  id="Definitions_1" 
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_1" name="Generated Process" processRef="Process_1" />
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_1" isExecutable="false">
+    {% if graph.graph.get('lanes') %}
+    <bpmn:laneSet id="LaneSet_1">
+      {% for lane_name, lane_data in graph.graph.get('lanes', {}).items() %}
+      <bpmn:lane id="lane_{{ lane_name | replace(' ', '_') }}" name="{{ lane_name }}">
+        {% for node_id, node in builder.nodes.items() if node.lane == lane_name %}
+        <bpmn:flowNodeRef>{{ node.id }}</bpmn:flowNodeRef>
+        {% endfor %}
+      </bpmn:lane>
+      {% endfor %}
+    </bpmn:laneSet>
+    {% endif %}
+
+    {% for node_id, node in builder.nodes.items() %}
+    {% if node.type == 'start' %}
+    <bpmn:startEvent id="{{ node.id }}" name="{{ node.label or '' }}" />
+    {% elif node.type == 'end' %}
+    <bpmn:endEvent id="{{ node.id }}" name="{{ node.label or '' }}" />
+    {% elif node.type == 'exclusive_gateway' %}
+    <bpmn:exclusiveGateway id="{{ node.id }}" name="{{ node.label or '' }}" />
+    {% elif node.type == 'parallel_gateway' %}
+    <bpmn:parallelGateway id="{{ node.id }}" name="{{ node.label or '' }}" />
+    {% else %}
+    <bpmn:task id="{{ node.id }}" name="{{ node.label or '' }}" />
+    {% endif %}
+    {% endfor %}
+
+    {% for source, target, edge_data in graph.edges(data=True) %}
+    <bpmn:sequenceFlow id="flow_{{ source }}_{{ target }}" sourceRef="{{ source }}" targetRef="{{ target }}" name="{{ edge_data.get('label', '') }}" />
+    {% endfor %}
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_1_di" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="1000" height="{{ (graph.graph.get('lanes', {}) | length) * 150 + 50 if graph.graph.get('lanes') else 400 }}" />
+      </bpmndi:BPMNShape>
+      
+      {% for lane_name, lane_data in graph.graph.get('lanes', {}).items() %}
+      <bpmndi:BPMNShape id="lane_{{ lane_name | replace(' ', '_') }}_di" bpmnElement="lane_{{ lane_name | replace(' ', '_') }}" isHorizontal="true">
+        <dc:Bounds x="150" y="{{ lane_data.get('y', 0) }}" width="{{ lane_data.get('width', 970) }}" height="{{ lane_data.get('height', 150) }}" />
+      </bpmndi:BPMNShape>
+      {% endfor %}
+
+      {% for node_id, node in builder.nodes.items() %}
+      <bpmndi:BPMNShape id="{{ node.id }}_di" bpmnElement="{{ node.id }}">
+        <dc:Bounds x="{{ node.x }}" y="{{ node.y }}" width="{{ node.metadata.get('width', 100) }}" height="{{ node.metadata.get('height', 80) }}" />
+      </bpmndi:BPMNShape>
+      {% endfor %}
+
+      {% for source, target, edge_data in graph.edges(data=True) %}
+      <bpmndi:BPMNEdge id="flow_{{ source }}_{{ target }}_di" bpmnElement="flow_{{ source }}_{{ target }}">
+        {% for point in edge_data.get('waypoints', [(0,0), (0,0)]) %}
+        <di:waypoint x="{{ point[0] }}" y="{{ point[1] }}" />
+        {% endfor %}
+      </bpmndi:BPMNEdge>
+      {% endfor %}
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,48 @@
+
+<mxGraphModel dx="1422" dy="798" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    
+    {% for lane_name, lane_data in graph.graph.get('lanes', {}).items() %}
+    <mxCell id="lane_{{ lane_name }}" value="{{ lane_name }}" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="{{ lane_data.get('x', 0) }}" y="{{ lane_data.get('y', 0) }}" width="{{ lane_data.get('width', 800) }}" height="{{ lane_data.get('height', 200) }}" as="geometry" />
+    </mxCell>
+    {% endfor %}
+
+    {% for node_id, node in builder.nodes.items() %}
+    {% set parent_id = "lane_" ~ node.lane if node.lane else "1" %}
+    {% if node.type == 'start' %}
+    <mxCell id="{{ node.id }}" value="{{ node.label or '' }}" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="{{ parent_id }}">
+      <mxGeometry x="{{ node.metadata.get('relative_x', 0) }}" y="{{ node.metadata.get('relative_y', 0) }}" width="{{ node.metadata.get('width', 40) }}" height="{{ node.metadata.get('height', 40) }}" as="geometry" />
+    </mxCell>
+    {% elif node.type == 'end' %}
+    <mxCell id="{{ node.id }}" value="{{ node.label or '' }}" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;" vertex="1" parent="{{ parent_id }}">
+      <mxGeometry x="{{ node.metadata.get('relative_x', 0) }}" y="{{ node.metadata.get('relative_y', 0) }}" width="{{ node.metadata.get('width', 40) }}" height="{{ node.metadata.get('height', 40) }}" as="geometry" />
+    </mxCell>
+    {% elif node.type in ['exclusive_gateway', 'parallel_gateway'] %}
+    <mxCell id="{{ node.id }}" value="{{ node.label or '' }}" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="{{ parent_id }}">
+      <mxGeometry x="{{ node.metadata.get('relative_x', 0) }}" y="{{ node.metadata.get('relative_y', 0) }}" width="{{ node.metadata.get('width', 60) }}" height="{{ node.metadata.get('height', 60) }}" as="geometry" />
+    </mxCell>
+    {% else %}
+    <mxCell id="{{ node.id }}" value="{{ node.label or '' }}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="{{ parent_id }}">
+      <mxGeometry x="{{ node.metadata.get('relative_x', 0) }}" y="{{ node.metadata.get('relative_y', 0) }}" width="{{ node.metadata.get('width', 120) }}" height="{{ node.metadata.get('height', 60) }}" as="geometry" />
+    </mxCell>
+    {% endif %}
+    {% endfor %}
+
+    {% for source, target, edge_data in graph.edges(data=True) %}
+    <mxCell id="{{ source }}_{{ target }}" value="{{ edge_data.get('label', '') }}" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;{{ edge_data.get('extra_style', '') }}" edge="1" parent="1" source="{{ source }}" target="{{ target }}">
+      <mxGeometry relative="1" as="geometry">
+        {% if edge_data.get('drawio_waypoints') %}
+        <Array as="points">
+          {% for point in edge_data.drawio_waypoints %}
+          <mxPoint x="{{ point[0] }}" y="{{ point[1] }}" />
+          {% endfor %}
+        </Array>
+        {% endif %}
+      </mxGeometry>
+    </mxCell>
+    {% endfor %}
+  </root>
+</mxGraphModel>
