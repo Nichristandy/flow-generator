@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+httpx
+typer
+rich
+networkx
+Jinja2
+graphviz
