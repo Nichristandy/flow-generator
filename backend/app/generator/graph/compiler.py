@@ -1,5 +1,5 @@
-from parser.ast import FlowAst, AstStart, AstEnd, AstTask, AstIf, AstElse, AstEndIf
-from graph.builder import GraphBuilder, Node
+from app.generator.parser.ast import FlowAst, AstStart, AstEnd, AstTask, AstIf, AstElse, AstEndIf, AstGoto, AstLabel
+from app.generator.graph.builder import GraphBuilder, Node
 import uuid
 
 def generate_id() -> str:
@@ -11,15 +11,17 @@ class AstCompiler:
         self.builder = GraphBuilder()
 
     def compile(self) -> GraphBuilder:
-        current_nodes = []
+        current_nodes = [] # List of {"id": str, "label": str}
         branch_stack = []
         name_to_node_id = {}
         deferred_gotos = []
+        pending_labels = []
         
         def add_edges_from_current(target_id: str):
-            for src in current_nodes:
-                label = ""
-                if branch_stack:
+            for src_obj in current_nodes:
+                src = src_obj["id"]
+                label = src_obj.get("label") or ""
+                if not label and branch_stack:
                     state = branch_stack[-1]
                     if src == state["gateway"]:
                         if not state["in_else"] and not state.get("if_started"):
@@ -31,15 +33,27 @@ class AstCompiler:
                 
                 self.builder.add_edge(src, target_id, {"label": label} if label else {})
         
+        def assign_labels(node_id: str):
+            nonlocal pending_labels
+            for lbl in pending_labels:
+                name_to_node_id[lbl] = node_id
+            pending_labels = []
+
         for ast_node in self.ast.nodes:
+            if isinstance(ast_node, AstLabel):
+                pending_labels.append(ast_node.name)
+                continue
+                
             if isinstance(ast_node, AstStart):
                 node = Node(id=generate_id(), label="", actor="System", lane="System", type="start")
                 self.builder.add_node(node)
-                current_nodes = [node.id]
+                assign_labels(node.id)
+                current_nodes = [{"id": node.id}]
                 
             elif isinstance(ast_node, AstEnd):
                 node = Node(id=generate_id(), label="", actor="System", lane="System", type="end")
                 self.builder.add_node(node)
+                assign_labels(node.id)
                 add_edges_from_current(node.id)
                 current_nodes = []
                 
@@ -47,19 +61,21 @@ class AstCompiler:
                 node = Node(id=generate_id(), label=ast_node.name, actor=ast_node.actor, lane=ast_node.actor, type="task")
                 self.builder.add_node(node)
                 name_to_node_id[ast_node.name] = node.id
+                assign_labels(node.id)
                 add_edges_from_current(node.id)
-                current_nodes = [node.id]
+                current_nodes = [{"id": node.id}]
                 
             elif isinstance(ast_node, AstIf):
                 # Gateway node
                 gw_lane = "System"
                 if current_nodes:
-                    parent_node = self.builder.get_node(current_nodes[0])
+                    parent_node = self.builder.get_node(current_nodes[0]["id"])
                     if parent_node:
                         gw_lane = parent_node.lane
                         
                 node = Node(id=generate_id(), label=f"{ast_node.condition}?", actor="System", lane=gw_lane, type="exclusive_gateway")
                 self.builder.add_node(node)
+                assign_labels(node.id)
                 add_edges_from_current(node.id)
                 
                 # Push state
@@ -70,7 +86,7 @@ class AstCompiler:
                     "else_ends": [],
                     "in_else": False
                 })
-                current_nodes = [node.id]
+                current_nodes = [{"id": node.id}]
                 
             elif isinstance(ast_node, AstElse):
                 if branch_stack:
@@ -78,7 +94,7 @@ class AstCompiler:
                     branch_stack[-1]["if_ends"] = current_nodes
                     branch_stack[-1]["in_else"] = True
                     # Reset current_nodes to the gateway
-                    current_nodes = [branch_stack[-1]["gateway"]]
+                    current_nodes = [{"id": branch_stack[-1]["gateway"]}]
                     
             elif isinstance(ast_node, AstEndIf):
                 if branch_stack:
@@ -88,39 +104,24 @@ class AstCompiler:
                     else:
                         state["if_ends"] = current_nodes
                         
-                    # Merge gateway
-                    gw_lane = "System"
-                    if state["if_ends"]:
-                        parent_node = self.builder.get_node(state["if_ends"][0])
-                        if parent_node:
-                            gw_lane = parent_node.lane
-                    elif state["else_ends"]:
-                        parent_node = self.builder.get_node(state["else_ends"][0])
-                        if parent_node:
-                            gw_lane = parent_node.lane
-                            
-                    merge_gw = Node(id=generate_id(), label="", actor="System", lane=gw_lane, type="exclusive_gateway")
-                    self.builder.add_node(merge_gw)
+                    current_nodes = []
                     
                     if state["if_ends"]:
-                        for src in state["if_ends"]:
-                            # If the source is the gateway itself and we haven't started, it needs a label
-                            label = ""
-                            if src == state["gateway"] and not state.get("if_started"):
-                                label = "Yes"
-                            self.builder.add_edge(src, merge_gw.id, {"label": label} if label else {})
+                        for src_obj in state["if_ends"]:
+                            if src_obj["id"] == state["gateway"] and not state.get("if_started"):
+                                current_nodes.append({"id": src_obj["id"], "label": "Yes"})
+                            else:
+                                current_nodes.append(src_obj)
                             
                     if state["else_ends"]:
-                        for src in state["else_ends"]:
-                            label = ""
-                            if src == state["gateway"] and not state.get("else_started"):
-                                label = "No"
-                            self.builder.add_edge(src, merge_gw.id, {"label": label} if label else {})
-                    elif not state["else_ends"] and not state.get("else_is_goto"):
-                        # Implicit empty else, unless it was a goto
-                        self.builder.add_edge(state["gateway"], merge_gw.id, {"label": "No"})
-                        
-                    current_nodes = [merge_gw.id]
+                        for src_obj in state["else_ends"]:
+                            if src_obj["id"] == state["gateway"] and not state.get("else_started"):
+                                current_nodes.append({"id": src_obj["id"], "label": "No"})
+                            else:
+                                current_nodes.append(src_obj)
+                    elif not state["in_else"]:
+                        # Implicit empty else (no ELSE block provided)
+                        current_nodes.append({"id": state["gateway"], "label": "No"})
                     
             elif type(ast_node).__name__ == "AstGoto":
                 # For AstGoto, connect all current_nodes to the target
@@ -130,15 +131,13 @@ class AstCompiler:
                 # If the source is the gateway itself, label it
                 if branch_stack:
                     state = branch_stack[-1]
-                    if current_nodes == [state["gateway"]]:
+                    if len(current_nodes) == 1 and current_nodes[0]["id"] == state["gateway"]:
                         label = "No" if state["in_else"] else "Yes"
-                        if state["in_else"]:
-                            state["else_is_goto"] = True
-                        else:
-                            state["if_is_goto"] = True
                 
-                for src in current_nodes:
-                    deferred_gotos.append((src, target_name, label))
+                for src_obj in current_nodes:
+                    src = src_obj["id"]
+                    edge_label = src_obj.get("label") or label
+                    deferred_gotos.append((src, target_name, edge_label))
                 
                 # A GOTO ends the current path
                 current_nodes = []

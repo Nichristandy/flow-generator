@@ -1,7 +1,7 @@
 from jinja2 import Environment, FileSystemLoader
 import os
-from generators.base import BaseGenerator
-from graph.builder import GraphBuilder
+from app.generator.generators.base import BaseGenerator
+from app.generator.graph.builder import GraphBuilder
 
 class BpmnGenerator(BaseGenerator):
     def generate(self, builder: GraphBuilder, **kwargs) -> str:

@@ -1,6 +1,6 @@
 import re
-from parser.base import BaseParser
-from parser.ast import FlowAst, AstStart, AstEnd, AstTask, AstIf, AstElse, AstEndIf, AstGoto
+from app.generator.parser.base import BaseParser
+from app.generator.parser.ast import FlowAst, AstStart, AstEnd, AstTask, AstIf, AstElse, AstEndIf, AstGoto, AstLabel
 
 class FlowParser(BaseParser):
     """Parses simple DSL or Markdown line-by-line flow into a FlowAst."""
@@ -28,6 +28,11 @@ class FlowParser(BaseParser):
             if upper_line.startswith("GOTO "):
                 target = line[5:].strip()
                 ast.nodes.append(AstGoto(target=target))
+                continue
+                
+            if upper_line.startswith("LABEL "):
+                label_name = line[6:].strip()
+                ast.nodes.append(AstLabel(name=label_name))
                 continue
                 
             if upper_line == "ELSE":

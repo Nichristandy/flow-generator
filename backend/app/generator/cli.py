@@ -2,17 +2,16 @@ import typer
 from rich.console import Console
 from pathlib import Path
 
-from parser.yaml_parser import YamlParser
-from parser.flow_parser import FlowParser
-from validator.validator import AstValidator
-from graph.compiler import AstCompiler
-from layout.optimizer import LayoutOptimizer
-from layout.connector import ConnectorOptimizer
-from generators.mermaid import MermaidGenerator
-from generators.bpmn import BpmnGenerator
-from generators.drawio import DrawioGenerator
-from generators.plantuml import PlantUmlGenerator
-from exporters.graphviz_exporter import GraphvizExporter
+from app.generator.parser.yaml_parser import YamlParser
+from app.generator.parser.flow_parser import FlowParser
+from app.generator.validator.validator import AstValidator
+from app.generator.graph.compiler import AstCompiler
+from app.generator.layout.layout_engine import LayoutEngine
+from app.generator.generators.mermaid import MermaidGenerator
+from app.generator.generators.bpmn import BpmnGenerator
+from app.generator.generators.drawio import DrawioGenerator
+from app.generator.generators.plantuml import PlantUmlGenerator
+from app.generator.exporters.graphviz_exporter import GraphvizExporter
 from graphviz.backend.execute import ExecutableNotFound
 
 app = typer.Typer(help="AI Flow Generator CLI")
@@ -61,10 +60,8 @@ def generate(
         
     # 4. Layout Engine
     console.print("Applying auto-layout...")
-    optimizer = LayoutOptimizer(builder)
-    optimizer.optimize()
-    connector = ConnectorOptimizer(builder)
-    connector.optimize()
+    engine = LayoutEngine(builder)
+    engine.execute()
     
     # 5. Generate & Export
     base_name = input_file.stem

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from parser.ast import FlowAst
+from app.generator.parser.ast import FlowAst
 
 class BaseParser(ABC):
     @abstractmethod

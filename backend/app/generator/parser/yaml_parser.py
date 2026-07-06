@@ -1,6 +1,6 @@
 import yaml
-from parser.base import BaseParser
-from parser.ast import FlowAst, AstTask, AstStart, AstEnd, AstIf, AstElse, AstEndIf
+from app.generator.parser.base import BaseParser
+from app.generator.parser.ast import FlowAst, AstTask, AstStart, AstEnd, AstIf, AstElse, AstEndIf
 
 class YamlParser(BaseParser):
     def parse(self, content: str) -> FlowAst:

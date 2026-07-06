@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from graph.builder import GraphBuilder
+from app.generator.graph.builder import GraphBuilder
 
 class BaseGenerator(ABC):
     @abstractmethod

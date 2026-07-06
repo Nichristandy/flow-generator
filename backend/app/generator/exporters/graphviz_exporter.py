@@ -1,5 +1,5 @@
 import graphviz
-from graph.builder import GraphBuilder
+from app.generator.graph.builder import GraphBuilder
 
 class GraphvizExporter:
     def __init__(self, builder: GraphBuilder):

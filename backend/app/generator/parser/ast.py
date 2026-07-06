@@ -35,5 +35,9 @@ class AstGoto(AstNode):
     target: str
 
 @dataclass
+class AstLabel(AstNode):
+    name: str
+
+@dataclass
 class FlowAst:
     nodes: List[AstNode]

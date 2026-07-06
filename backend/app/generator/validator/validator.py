@@ -1,4 +1,4 @@
-from parser.ast import FlowAst, AstStart, AstEnd, AstIf, AstElse, AstEndIf
+from app.generator.parser.ast import FlowAst, AstStart, AstEnd, AstIf, AstElse, AstEndIf
 
 class ValidationError(Exception):
     pass
