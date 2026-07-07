@@ -12,7 +12,7 @@ export function LivePreview({ previewUrl }: LivePreviewProps) {
 
   useEffect(() => {
     if (previewUrl && previewUrl.endsWith('.svg')) {
-      fetch('http://localhost:8000' + previewUrl)
+      fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000') + previewUrl)
         .then(res => {
           if (!res.ok) throw new Error("Failed to load preview");
           return res.text();

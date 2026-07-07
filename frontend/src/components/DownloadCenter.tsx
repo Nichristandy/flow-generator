@@ -12,7 +12,7 @@ export function DownloadCenter({ sessionId, files }: DownloadCenterProps) {
   if (!sessionId) return null;
 
   const downloadFile = (filename: string) => {
-    window.location.href = `http://localhost:8000/api/download/${sessionId}/${filename}`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/download/${sessionId}/${filename}`;
   };
 
   return (
