@@ -27,7 +27,7 @@ export default function Home() {
     setIsGenerating(true);
     
     try {
-      const response = await axios.post('http://localhost:8000/api/chat', { messages: newHistory });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/chat`, { messages: newHistory });
       
       setHistory(prev => [...prev, { role: 'assistant', content: response.data.message }]);
       

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: bpmn_generator_backend
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+    # Uncomment and adjust the path if you need to persist generated outputs
+    # volumes:
+    #   - ./backend/output:/app/output
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: bpmn_generator_frontend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      # This tells Next.js to use the backend URL
+      # Change this to your VPS's domain or public IP if needed
+      # (e.g., https://api.yourdomain.com)
+      - NEXT_PUBLIC_API_URL=http://43.157.230.121:8000
