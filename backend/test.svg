@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1610" height="1150">
+<style>
+.lane { fill: none; stroke: #333; stroke-width: 2; }
+.lane-title { font-family: sans-serif; font-size: 14px; font-weight: bold; fill: #333; }
+.task { fill: #dae8fc; stroke: #6c8ebf; stroke-width: 2; rx: 5; ry: 5; }
+.gateway { fill: #fff2cc; stroke: #d6b656; stroke-width: 2; }
+.start { fill: #d5e8d4; stroke: #82b366; stroke-width: 2; }
+.end { fill: #f8cecc; stroke: #b85450; stroke-width: 3; }
+.text { font-family: sans-serif; font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+.edge { fill: none; stroke: #000; stroke-width: 1.5; }
+.edge-label { font-family: sans-serif; font-size: 11px; fill: #555; background-color: white; }
+</style>
+
+        <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#000" />
+            </marker>
+        </defs>
+        
+<rect class="lane" x="50" y="100" width="1510" height="200" />
+<rect class="lane" x="50" y="100" width="40" height="200" fill="#f5f5f5" />
+<text class="lane-title" x="70" y="200.0" transform="rotate(-90, 70, 200.0)" text-anchor="middle">System</text>
+<rect class="lane" x="50" y="300" width="1510" height="200" />
+<rect class="lane" x="50" y="300" width="40" height="200" fill="#f5f5f5" />
+<text class="lane-title" x="70" y="400.0" transform="rotate(-90, 70, 400.0)" text-anchor="middle">Procurement</text>
+<rect class="lane" x="50" y="500" width="1510" height="200" />
+<rect class="lane" x="50" y="500" width="40" height="200" fill="#f5f5f5" />
+<text class="lane-title" x="70" y="600.0" transform="rotate(-90, 70, 600.0)" text-anchor="middle">Approval Director</text>
+<rect class="lane" x="50" y="700" width="1510" height="200" />
+<rect class="lane" x="50" y="700" width="40" height="200" fill="#f5f5f5" />
+<text class="lane-title" x="70" y="800.0" transform="rotate(-90, 70, 800.0)" text-anchor="middle">Receipt Warehouse</text>
+<rect class="lane" x="50" y="900" width="1510" height="200" />
+<rect class="lane" x="50" y="900" width="40" height="200" fill="#f5f5f5" />
+<text class="lane-title" x="70" y="1000.0" transform="rotate(-90, 70, 1000.0)" text-anchor="middle">Finance</text>
+<path class="edge" d="M 170.0 220.0 L 170.0 370.0 " marker-end="url(#arrow)" />
+<path class="edge" d="M 240 400.0 L 240 600.0 L 320 600.0 " marker-end="url(#arrow)" />
+<path class="edge" d="M 460 600.0 L 570.0 600.0 " marker-end="url(#arrow)" />
+<path class="edge" d="M 610.0 640.0 L 610.0 800.0 L 980 800.0 " marker-end="url(#arrow)" />
+<rect x="610.0" y="712.0" width="30" height="16" fill="white" />
+<text class="edge-label" x="625.0" y="720.0">Yes</text>
+<path class="edge" d="M 610.0 560.0 L 610.0 400.0 L 980 400.0 " marker-end="url(#arrow)" />
+<rect x="610.0" y="472.0" width="30" height="16" fill="white" />
+<text class="edge-label" x="625.0" y="480.0">No</text>
+<path class="edge" d="M 1050.0 830.0 L 1050.0 970.0 " marker-end="url(#arrow)" />
+<path class="edge" d="M 1120 1000.0 L 1200 1000.0 " marker-end="url(#arrow)" />
+<path class="edge" d="M 1270.0 970.0 L 1270.0 220.0 " marker-end="url(#arrow)" />
+<path class="edge" d="M 980 400.0 L 980 520 L 390.0 520 L 390.0 570.0 " marker-end="url(#arrow)" />
+<circle class="start" cx="170.0" cy="200.0" r="20.0" />
+<rect class="task" x="100" y="370.0" width="140" height="60" />
+<text class="text" x="170.0" y="394.0">Create</text>
+<text class="text" x="170.0" y="408.0">Purchase Order</text>
+<rect class="task" x="320" y="570.0" width="140" height="60" />
+<text class="text" x="390.0" y="600.0">Review PO</text>
+<polygon class="gateway" points="610.0,560.0 650.0,600.0 610.0,640.0 570.0,600.0" />
+<text class="text" font-size="10" x="610.0" y="594.0">PO</text>
+<text class="text" font-size="10" x="610.0" y="608.0">is approved?</text>
+<rect class="task" x="980" y="770.0" width="140" height="60" />
+<text class="text" x="1050.0" y="800.0">Receive Goods</text>
+<rect class="task" x="980" y="970.0" width="140" height="60" />
+<text class="text" x="1050.0" y="994.0">Process</text>
+<text class="text" x="1050.0" y="1008.0">Vendor Bill</text>
+<rect class="task" x="1200" y="970.0" width="140" height="60" />
+<text class="text" x="1270.0" y="994.0">Make</text>
+<text class="text" x="1270.0" y="1008.0">Vendor Payment</text>
+<rect class="task" x="980" y="370.0" width="140" height="60" />
+<text class="text" x="1050.0" y="400.0">Revise PO</text>
+<circle class="end" cx="1270.0" cy="200.0" r="20.0" />
+</svg>

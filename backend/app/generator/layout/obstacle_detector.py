@@ -15,14 +15,17 @@ class ObstacleDetector:
                 return False
         return True
 
-    def is_segment_free(self, p1: LayoutPoint, p2: LayoutPoint) -> bool:
+    def is_segment_free(self, p1: LayoutPoint, p2: LayoutPoint, ignore_boxes: List[BoundingBox] = None) -> bool:
         # Assume orthogonal segments
+        ignore_boxes = ignore_boxes or []
         min_x = min(p1.x, p2.x)
         max_x = max(p1.x, p2.x)
         min_y = min(p1.y, p2.y)
         max_y = max(p1.y, p2.y)
 
         for obs in self.obstacles:
+            if obs in ignore_boxes:
+                continue
             if p1.y == p2.y:
                 # Horizontal segment
                 if (obs.top - self.margin < p1.y < obs.bottom + self.margin):

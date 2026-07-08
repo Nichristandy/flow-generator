@@ -27,9 +27,9 @@ export function ChatInterface({ history, onSendMessage, isGenerating }: ChatInte
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800">
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 font-semibold text-lg flex items-center gap-2">
-        <span>AI Flow Generator</span>
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-none">
+      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        Chat
       </div>
       
       <ScrollArea className="flex-1 p-4 min-h-0">
@@ -55,7 +55,7 @@ export function ChatInterface({ history, onSendMessage, isGenerating }: ChatInte
         </div>
       </ScrollArea>
       
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="flex gap-2 items-end">
           <Textarea 
             value={prompt}
@@ -63,9 +63,9 @@ export function ChatInterface({ history, onSendMessage, isGenerating }: ChatInte
             placeholder="Type your process description... (Shift+Enter for new line)"
             onKeyDown={handleKeyDown}
             disabled={isGenerating}
-            className="flex-1 min-h-[60px] max-h-[200px] resize-y"
+            className="flex-1 min-h-[60px] max-h-[200px] resize-y text-sm"
           />
-          <Button onClick={handleSend} disabled={isGenerating || !prompt.trim()} className="mb-1">
+          <Button onClick={handleSend} disabled={isGenerating || !prompt.trim()} className="mb-1 bg-blue-600 hover:bg-blue-700">
             <Send className="w-4 h-4" />
           </Button>
         </div>

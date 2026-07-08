@@ -66,7 +66,7 @@ export function LivePreview({ previewUrl }: LivePreviewProps) {
           <div className="text-red-500 p-4">{error}</div>
         ) : zoomedSvg ? (
           <div 
-            className="inline-block min-w-full min-h-full"
+            className="w-full h-full"
             dangerouslySetInnerHTML={{ __html: zoomedSvg }}
           />
         ) : previewUrl ? (

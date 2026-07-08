@@ -59,10 +59,14 @@ class NodePlacer:
                 
                 col = max_parent_col
                 
-                # Rule 20 & 21: Allow vertical stacking (same column) if single parent and parent has single child, regardless of lane changes
-                if parent_node and len(preds) == 1 and self.graph.out_degree(parent_id) == 1:
+                # Rule 20 & 21: Allow vertical stacking (same column) if single parent and parent has single child, AND they are in different lanes
+                if parent_node and len(preds) == 1 and self.graph.out_degree(parent_id) == 1 and node.lane != parent_node.lane:
                     pass
                 else:
+                    col += 1
+                    
+                # Add extra space after gateways so Yes/No labels don't overlap
+                if parent_node and parent_node.type in ("exclusive_gateway", "parallel_gateway"):
                     col += 1
                 
                 row = 0
@@ -104,7 +108,22 @@ class NodePlacer:
             if node.box.width < 140:
                 x += (140 - node.box.width) / 2
                 
-            y = self.lane_y_offsets.get(node.lane, self.start_y) + (row * self.grid_size_y) + 40
+            lane_info = self.builder.graph.graph.get("lanes", {}).get(node.lane, {})
+            lane_y = lane_info.get("y", self.start_y)
+            lane_h = lane_info.get("height", 200)
+            
+            # Calculate total block height for all rows in this lane
+            rows_in_lane = max(1, lane_rows[node.lane])
+            block_height = (rows_in_lane - 1) * self.grid_size_y + 80 # 80 is max node height
+            
+            # Vertically center the block within the lane height
+            margin_top = (lane_h - block_height) / 2
+            
+            # Calculate the vertical center of the specific row
+            row_center_y = lane_y + margin_top + (row * self.grid_size_y) + 40
+            
+            # Align the node's center to the row's center
+            y = row_center_y - (node.box.height / 2)
             
             node.box.x = x
             node.box.y = y
