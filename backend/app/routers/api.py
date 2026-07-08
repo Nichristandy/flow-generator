@@ -2,19 +2,33 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
 from typing import List
+import os
 
-from app.schemas.requests import ChatRequest, ImproveRequest, GenerateResponse
+from app.schemas.requests import ChatRequest, ImproveRequest, RenderRequest, GenerateResponse
 from app.services.pipeline import PipelineService, TEMP_DIR
 
 router = APIRouter(prefix="/api", tags=["Flow Generator"])
 pipeline = PipelineService()
+
+@router.get("/config")
+async def get_config():
+    """Returns available models from env vars so frontend can populate dropdowns dynamically."""
+    return {
+        "openrouter_models": [m.strip() for m in os.getenv("OPENROUTER_MODELS", "deepseek/deepseek-coder").split(",")],
+        "deepseek_models": [m.strip() for m in os.getenv("DEEPSEEK_MODELS", "deepseek-coder,deepseek-chat").split(",")]
+    }
 
 @router.post("/chat", response_model=GenerateResponse)
 async def generate_flow(request: ChatRequest):
     try:
         # Convert ChatMessage objects to dicts
         conversation = [{"role": msg.role, "content": msg.content} for msg in request.messages]
-        response_dict = await pipeline.generate_flow(conversation)
+        response_dict = await pipeline.generate_flow(
+            conversation,
+            provider_name=request.provider,
+            model=request.model,
+            api_key=request.api_key
+        )
         return GenerateResponse(**response_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -22,7 +36,21 @@ async def generate_flow(request: ChatRequest):
 @router.post("/improve", response_model=GenerateResponse)
 async def improve_flow(request: ImproveRequest):
     try:
-        response_dict = await pipeline.improve_flow(request.dsl, request.prompt)
+        response_dict = await pipeline.improve_flow(
+            request.dsl, 
+            request.prompt,
+            provider_name=request.provider,
+            model=request.model,
+            api_key=request.api_key
+        )
+        return GenerateResponse(**response_dict)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/render", response_model=GenerateResponse)
+async def render_flow(request: RenderRequest):
+    try:
+        response_dict = await pipeline.render_flow(request.dsl)
         return GenerateResponse(**response_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
