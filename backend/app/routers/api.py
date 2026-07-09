@@ -69,6 +69,8 @@ async def download_file(session_id: str, filename: str):
         media_type = "image/png"
     elif filename.endswith(".zip"):
         media_type = "application/zip"
+    elif filename.endswith(".drawio"):
+        media_type = "application/xml"
     elif filename.endswith(".md") or filename.endswith(".mmd") or filename.endswith(".puml"):
         media_type = "text/plain"
         
